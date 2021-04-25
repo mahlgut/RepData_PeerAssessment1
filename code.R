@@ -1,57 +1,51 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
-
-
-## Loading and preprocessing the data
-
-For this assignment, I need the packages tidyverse and lubridate. At first, the packages are loaded, then the activity file is unzipped and assigned to variables. The date-column needs to be formatted into a date variable.
-
-```{r echo = TRUE}
 library(tidyverse)
 library(lubridate)
-
-
+library(knitr)
+list.files()
 unzip("./activity.zip")
 activityfile <- read.csv("activity.csv")
 activityfile$date <- as.Date(activityfile$date)
-```
 
-## What is mean total number of steps taken per day?
+#Q1: plot histogram of total number of steps taken each day
+stepsperdaysum <- aggregate(activityfile$steps, list(activityfile$date), sum)
+names(stepsperdaysum) <- c("Date", "Steps.per.day.sum")
 
+ggplot(data = stepsperdaysum) +
+  geom_histogram(aes(Steps.per.day.sum))
 
-```{r echo = TRUE}
+#Q2: calculate mean number of steps per day
 averagesteps <- mean(activityfile$steps, na.rm = TRUE)
-```
+averagesteps
 
-The mean total number of steps taken per day is `r averagesteps`
-
-## What is the average daily activity pattern?
-
-```{r echo = TRUE}
 stepsperdaymean <- aggregate(activityfile$steps, list(activityfile$date), FUN = mean, na.rm = TRUE)
 names(stepsperdaymean) <- c("Date", "Steps.per.day.mean")
 stepsperdaymean$Date <- as.Date(stepsperdaymean$Date)
 stepsperdaymean
 
+#calculate median number of steps per day
+stepsperdaymedian <- aggregate(activityfile$steps, list(activityfile$date), median)
+names(stepsperdaymedian) <- c("Date", "Steps.per.day.median")
+
+#Q3: plot time series of average steps per day
 ggplot(data = stepsperdaymean, aes(x = Date, y = Steps.per.day.mean, group = 1)) +
   geom_point() + geom_line()
 
-```
+#Q4:The 5-minute interval that, on average, contains the maximum number of steps
+activityfileomitted <- na.omit(activityfile)
+activityfileomitted$interval[activityfileomitted$steps == as.integer(max(activityfileomitted$steps))]
 
-## Imputing missing values
-```{r echo = TRUE}
+#Q5: impute missing data
 nafiles <- sum(is.na(activityfile$steps))
 activityfile$steps[is.na(activityfile$steps)] <- mean(activityfile$steps[activityfile$date])
-```
-The numer of NA's is `r nafiles`
 
+#Q6: Histogram of the total number of steps taken each day after missing values are imputed
+stepsperdaysum <- aggregate(activityfile$steps, list(activityfile$date), sum)
+names(stepsperdaysum) <- c("Date", "Steps.per.day.sum")
 
-## Are there differences in activity patterns between weekdays and weekends?
-```{r echo = TRUE}
+ggplot(data = stepsperdaysum) +
+  geom_histogram(aes(Steps.per.day.sum))
+
+#Q7:comparing the average number of steps taken per 5-minute interval across weekdays and weekends
 activityfile$weekday <- weekdays(activityfile$date)
 activityfile$weekend <- "weekend"
 activityfile$weekend[activityfile$weekday == "Montag" | activityfile$weekday == "Dienstag" | activityfile$weekday == "Mittwoch" | activityfile$weekday == "Donnerstag" | activityfile$weekday == "Freitag"] <- "weekdays"
@@ -59,6 +53,3 @@ stepsperintervalmean <- aggregate(activityfile$steps ~ activityfile$interval+act
 names(stepsperintervalmean) <- c("Interval", "Weekpart", "Steps")
 ggplot(stepsperintervalmean, aes(Interval, Steps)) + geom_point() +
   facet_grid(rows = vars(Weekpart))
-```
-
-There are some differences, e.g. higher number of steps per day in the morning during weekdays, but a higher number during the afternoon during the weekend.
