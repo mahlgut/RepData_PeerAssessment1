@@ -27,7 +27,7 @@ stepsperdaymean
 #calculate median number of steps per day
 stepsperdaymedian <- aggregate(activityfile$steps, list(activityfile$date), median)
 names(stepsperdaymedian) <- c("Date", "Steps.per.day.median")
-
+median(activityfile$steps)
 #Q3: plot time series of average steps per day
 
 png(file = "./instructions_fig/timeseriesavg.png", width = 480, height = 480)

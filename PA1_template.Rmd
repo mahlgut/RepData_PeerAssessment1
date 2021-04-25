@@ -25,9 +25,11 @@ activityfile$date <- as.Date(activityfile$date)
 
 ```{r echo = TRUE}
 averagesteps <- mean(activityfile$steps, na.rm = TRUE)
+mediansteps <- median(activityfile$steps)
 ```
 
 The mean total number of steps taken per day is `r averagesteps`
+The median number of steps taken per day is `r mediansteps`
 
 ## What is the average daily activity pattern?
 
@@ -42,12 +44,22 @@ ggplot(data = stepsperdaymean, aes(x = Date, y = Steps.per.day.mean, group = 1))
 
 ```
 
+#Q4:The 5-minute interval that, on average, contains the maximum number of steps
+```{r echo = TRUE}
+activityfileomitted <- na.omit(activityfile)
+fiveinterval <- activityfileomitted$interval[activityfileomitted$steps == as.integer(max(activityfileomitted$steps))]
+```
+
+The 5-minute interval on average containing the maximum number of steps is `r fiveinterval`
+
+
 ## Imputing missing values
 ```{r echo = TRUE}
 nafiles <- sum(is.na(activityfile$steps))
 activityfile$steps[is.na(activityfile$steps)] <- mean(activityfile$steps[activityfile$date])
 ```
 The numer of NA's is `r nafiles`
+The missing files are filled with the mean values.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
